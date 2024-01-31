@@ -229,9 +229,9 @@ class PreDictPath:
         Velocity = VehSelf['VLgt']
         VelocityReal = VehSelf['VLgt']
         Curvature  = copy.copy(Curvatureinin)
+        Curvaturer  = copy.copy(Curvatureinin)
         CurvatureRate =copy.copy(CurvatureRatein)
         PiontNum = 30
-        MinPredictDistance = 15
         PredictTime = 4
         '''
         if (VehSelf['VLgt']*PredictTime + VehSelf['ALgt']*PredictTime*PredictTime) < MinPredictDistance:
@@ -240,9 +240,14 @@ class PreDictPath:
         dt  = PredictTime / (PiontNum-1)
         X = []
         Y = []
+        X_r = []
+        Y_r = []
         x = 0
         y = 0
+        xr = 0
+        yr = 0
         Heading  = 0
+        Headingr  = 0
 
         for i in range(1,PiontNum):
             if i > 7 and i < 16:
@@ -264,7 +269,16 @@ class PreDictPath:
             
             X.append(x)
             Y.append(y)
-        return X,Y
+            
+        Velocity_ = -3.0
+        for i in range(1,PiontNum):
+            X_r.append(xr)
+            Y_r.append(yr)
+            xr = xr + Velocity_ * math.cos(Headingr) * dt
+            yr = yr + Velocity_ * math.sin(Headingr) * dt
+            Headingr  = Headingr + Velocity_ * Curvaturer*dt
+            Curvaturer = Curvaturer + CurvatureRate*dt
+        return X,Y,X_r,Y_r
 
     ##################### ClothoidCurvePath #############
     def ClothoidCurvePath(self,VehSelf,Curvature,CurvatureRate):

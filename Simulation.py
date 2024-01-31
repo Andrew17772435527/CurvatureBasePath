@@ -89,7 +89,7 @@ if __name__ == '__main__':
     VehSelf['VLgt'] = odometry_data['hostVel_mps'][0]
     VehSelf['ALgt'] = odometry_data['accel_mps2x'][0]
     X,Y = Path.BezierCurvePath1(VechicleMotionT1,VehSelf,Curvature[0],CurvatureRate[0],w)
-    X_m,Y_m = Path.ModelBaseCurvePath(VehSelf,Curvature[0],CurvatureRate[0])
+    X_m,Y_m,X_r,Y_r = Path.ModelBaseCurvePath(VehSelf,Curvature[0],CurvatureRate[0])
     # 参数范围
     a_min, a_max = 0, 1
     n_min, n_max = 0, len(od_path_data[0,:])-1
@@ -134,8 +134,9 @@ if __name__ == '__main__':
     fig1, ax = plt.subplots()
     car_shape = Polygon([[-0.9, -1], [2.8, -1], [2.8, 1], [-0.9, 1]])
     ax.add_patch(car_shape)
-    line_bezier, = ax.plot(X,Y,linewidth=5,linestyle='dashed',color = 'r',label ='Predict Path')
-    line_modelbase, = ax.plot(X_m,Y_m,linewidth=5,color = 'g',label ='Predict Path')
+    line_bezier, = ax.plot(X,Y,linewidth=5,linestyle='dashed',color = 'r',label ='Bezier Predict Path')
+    line_modelbase, = ax.plot(X_m,Y_m,linewidth=5,color = 'g',label ='Model Base Predict Path')
+    line_modelbase_r, = ax.plot(X_r,Y_r,linewidth=5,linestyle='dashed',color = 'k',label ='Predict Path reverse')
     leftpath,rightpath = CalculateBounder(X,Y,1.75)
     line_left_bounder, = ax.plot(leftpath[:,0],leftpath[:,1],color = 'k')
     line_right_bounder, = ax.plot(rightpath[:,0],rightpath[:,1],color = 'c')
@@ -175,7 +176,7 @@ if __name__ == '__main__':
             if Curvature[n]*CurvatureRate[n] > 0:# 正在加大转弯，需要减缓转弯
                 k2 = -d*abs(CurvatureRate[n])/CurvatureRate[n]
         X,Y = Path.BezierCurvePath1(VechicleMotionT1,VehSelf,Curvature[n]+k1*c_d,CurvatureRate[n]+k2*cr_d,w1)
-        X_m,Y_m = Path.ModelBaseCurvePath(VehSelf,Curvature[n],CurvatureRate[n])
+        X_m,Y_m,X_r,Y_r = Path.ModelBaseCurvePath(VehSelf,Curvature[n],CurvatureRate[n])
         od_path_data = tools.plot_od_path(odometry_data, odometry_data['timestamp'][n],50,0)
         x = od_path_data[0,:]
         y = od_path_data[1,:]
@@ -189,6 +190,7 @@ if __name__ == '__main__':
         
         line_bezier.set_data(X,Y)
         line_modelbase.set_data(X_m,Y_m)
+        line_modelbase_r.set_data(X_r,Y_r)
         line_od.set_data(x,y)
         fig1.canvas.draw_idle()
         
